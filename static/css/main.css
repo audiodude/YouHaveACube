@@ -1,20 +1,24 @@
 #page {
-  width: 750px
+	overflow: hidden;
+  width: 750px;
 }
 
 #prompt {
 	font-family: monospace;
   font-size: 20px;
+	position: relative;
 }
 
 #result {
   background-color: lightyellow;
 	font-family: monospace;
 	font-size: 20px;
+	position: relative;
 }
 
 #actions {
   padding: 10px;
+	position: relative;
 }
 
 .action {

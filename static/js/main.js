@@ -98,9 +98,47 @@ cube.write = function(callback) {
 };
 
 cube.walk = function() {
-	value = { 'result': 'All the doors and windows are barred shut, sorry!' }
+	value = {};
+	if (cube.happy < 0) {
+		value.result = Mustache.render(
+			'{{name}}{{^name}}Your cube{{/name}} is feeling too grumpy to go for a '+
+				'walk.',
+			{ 'name': cube.name }
+		);
+	} else {
+		value.result = Mustache.render(
+			'You grab your coat and head out the door with ' + 
+				'{{name}}{{^name}}your cube{{/name}}.',
+			{ 'name': cube.name }
+		);
+		window.setTimeout(function() {
+			animateGoDivs(setupWalk(animateBackDivs));
+		}, 1600);
+	}
 	addPrompt(value);
 	return value;
+}
+
+function animateGoDivs(callback) {
+	callback = callback || $.noop;
+	$('#result').animate({left: '100%'}, 100, function() {
+		$('#prompt').animate({left: '-100%'}, 100, function() {
+			$('#actions').animate({left: '100%'}, 100, function() {
+				callback();
+			});
+		});
+	});
+}
+
+function animateBackDivs(callback) {
+	callback = callback || $.noop;
+	$('#result').animate({left: '0'}, 100, function() {
+		$('#prompt').animate({left: '0'}, 100, function() {
+			$('#actions').animate({left: '0'}, 100, function() {
+				callback();
+			});
+		});
+	});
 }
 
 function doWord(word) {
@@ -113,6 +151,10 @@ function doWord(word) {
 	if (value) {
 		callback(value);
   }
+}
+
+function setupWalk(callback) {
+	window.setTimeout(callback, 1600);
 }
 
 function parseActions() {
