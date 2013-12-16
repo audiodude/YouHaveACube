@@ -71,17 +71,25 @@ cube.leash = function() {
 	return value;
 };
 
+cube.NAME_ADJ = [
+	'precious', 'darling', 'cutesy', 'cute', 'radical', 'hip', 'happenin', 'cool', 
+	'neat', 'gnarly', 'rockin', 'sweet'
+];
+
 cube.write = function(callback) {
 	function processWriting() {
 		cube.name = $('#cube_name').val();
+		var name_adj = cube.NAME_ADJ[Math.floor(Math.random()*cube.NAME_ADJ.length)]
 		value = {
-			result: 'You named your cube "' + cube.name + '". What a precious name!'
+			result: 'You named your cube "' + cube.name + '". What a ' + name_adj + 
+				' name!'
 		}
 		addPrompt(value)
 		callback(value)
 	}
 
   $('#result').html('You write <input id="cube_name" maxlength="12"> on the cube');
+	$('#cube_name').focus();
 	$('#cube_name').keyup(function(evt){
     if(evt.keyCode == 13){
 			processWriting();
