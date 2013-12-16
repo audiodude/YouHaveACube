@@ -1,36 +1,41 @@
 #page {
-	overflow: hidden;
+  overflow: hidden;
   width: 750px;
 }
 
 #prompt {
-	font-family: monospace;
+  font-family: monospace;
   font-size: 20px;
-	position: relative;
+  position: relative;
 }
 
 #result {
   background-color: lightyellow;
-	font-family: monospace;
-	font-size: 20px;
-	position: relative;
+  font-family: monospace;
+  font-size: 20px;
+  position: relative;
+}
+
+#description {
+  font-family: monospace;
+  position: relative;
 }
 
 #actions {
   padding: 10px;
-	position: relative;
+  position: relative;
 }
 
 .action {
-	color: #008080;
-	cursor: pointer;
+  color: #008080;
+  cursor: pointer;
   display: inline-block;
-	font-family: sans-serif;
-	margin-left: 20px;
+  font-family: sans-serif;
+  margin-left: 20px;
 }
 
 .word {
-	color: #006060;
+  color: #006060;
   text-transform: uppercase;
   font-weight: bold;
 }
