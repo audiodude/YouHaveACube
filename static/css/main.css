@@ -1,0 +1,32 @@
+#page {
+  width: 750px
+}
+
+#prompt {
+	font-family: monospace;
+  font-size: 20px;
+}
+
+#result {
+  background-color: lightyellow;
+	font-family: monospace;
+	font-size: 20px;
+}
+
+#actions {
+  padding: 10px;
+}
+
+.action {
+	color: #008080;
+	cursor: pointer;
+  display: inline-block;
+	font-family: sans-serif;
+	margin-left: 20px;
+}
+
+.word {
+	color: #006060;
+  text-transform: uppercase;
+  font-weight: bold;
+}
