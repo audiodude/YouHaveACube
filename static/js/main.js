@@ -1,10 +1,11 @@
 var cube = {
-  happy: 0
+  happy: 0,
+  go: {}
 };
 
 cube.DESCS = {
   'house': '',
-  'outside': 'Outside it is an overcast fall day. There are a few straggling leaves in your yard, leftovers from raking. Your brother Lyle\'s <span class="object">car</span> is parked outside the yard\'s white picket fence.'
+  'outside': 'Outside it is an overcast fall day. There are a few straggling leaves in your yard, leftovers from raking. Your brother Lyle\'s <span class="object">car</span> is parked outside the yard\'s white picket fence. There is an expanse of inviting sidewalk leading from the gate in the fence.'
 }
 
 
@@ -117,9 +118,7 @@ cube.walk = function() {
         '{{name}}{{^name}}your cube{{/name}}.',
       { 'name': cube.name }
     );
-    window.setTimeout(function() {
-      animateGoDivs(setupWalk.bind(undefined, animateBackDivs));
-    }, 1600);
+    moveTo('outside');
   }
   addPrompt(value);
   return value;
@@ -131,7 +130,9 @@ function animateGoDivs(callback) {
     $('#description').animate({left: '100%'}, 200, function() {
       $('#prompt').animate({left: '-100%'}, 200, function() {
         $('#actions').animate({left: '100%'}, 200, function() {
-          callback();
+          $('#directions').animate({left: '-100%'}, 200, function() {
+            callback();
+          });
         });
       });
     });
@@ -144,7 +145,9 @@ function animateBackDivs(callback) {
     $('#description').animate({left: '0'}, 200, function() {
       $('#prompt').animate({left: '0'}, 200, function() {
         $('#actions').animate({left: '0'}, 200, function() {
-          callback();
+          $('#directions').animate({left: '0'}, 200, function() {
+            callback();
+          });
         });
       });
     });
@@ -152,15 +155,32 @@ function animateBackDivs(callback) {
 }
 
 function appendAction(action) {
-  var action = $('<span class="action" style="display: none">' + action + 
-                 '</span>')
-  $('#actions').append(action);
+  action = $('<span class="action" style="display: none">' + action + '</span>');
   attachAction(undefined, action);
+  $('#actions').append(action);
   action.fadeIn();
 }
 
 function removeAction(word) {
-  $('#actions .action:contains("' + word + '")').remove();
+  $('#actions .action:contains("' + word + '")').fadeOut({
+    complete: function() { this.remove(); }
+  });
+}
+
+function clearActions() {
+  $('#actions').html('');
+}
+
+function appendDirection(direction, loc_name) {
+  direction = $('<span class="direction" style="display: none">' + direction +
+                '</span>');
+  attachDirection(undefined, direction, loc_name);
+  $('#directions').append(direction);
+  direction.fadeIn();
+}
+
+function clearDirections() {
+  $('#directions').html('');
 }
 
 function doWord(word) {
@@ -175,11 +195,38 @@ function doWord(word) {
   }
 }
 
-function setupWalk(callback) {
+function moveTo(location) {
+  window.setTimeout(function() {
+    animateGoDivs(cube.go[location].bind(undefined, animateBackDivs))
+  }, 1600);
+}
+
+cube.go.house = function(callback) {
+  $('#result').html('');
+  $('#description').html(cube.DESCS['house']);
+
+  clearActions();
+  appendAction('<span class="word">pet</span> the cube');
+  appendAction('<span class="word">write</span> on the cube');
+  appendAction('go for a <span class="word">walk</span>');
+ 
+  clearDirections();
+
+  window.setTimeout(callback, 800);
+}
+
+cube.go.outside = function(callback) {
   $('#result').html('');
   $('#description').html(cube.DESCS['outside']);
-  removeAction('walk');
-  removeAction('leash');
+ 
+  clearActions();
+  appendAction('<span class="word">pet</span> the cube');
+  appendAction('<span class="word">write</span> on the cube');
+
+  clearDirections();
+  appendDirection('go back <span class="loc">inside</span>', 'house');
+  appendDirection('go to the <span class="loc">sidewalk</span>');
+
   window.setTimeout(callback, 800);
 }
 
@@ -198,6 +245,24 @@ function attachAction(i, action) {
     }
     $('#result').text('');
     window.setTimeout(function() { doWord(word); }, 200);
+  });
+}
+
+function attachDirection(i, direction, location) {
+  $(direction).click(function(evt) {
+    if (!location) {
+      var tar = $(evt.target);
+      if (tar.hasClass('loc')) {
+        location = tar.text();
+      } else {
+        location = tar.children('.loc').text();
+      }
+      if (!location) {
+        console.error('Could not get location: ', tar);
+        return;
+      }
+    }
+    moveTo(location);
   });
 }
 

@@ -26,16 +26,37 @@
   position: relative;
 }
 
-.action {
-  color: #008080;
+#directions {
+  padding: 10px;
+  position: relative;
+}
+
+.action,
+.direction {
   cursor: pointer;
   display: inline-block;
   font-family: sans-serif;
   margin-left: 20px;
 }
 
-.word {
-  color: #006060;
+.action {
+  color: #008080;
+}
+
+.direction {
+  color: #008000;
+}
+
+.word,
+.loc {
   text-transform: uppercase;
   font-weight: bold;
+}
+
+.word {
+  color: #006060;
+}
+
+.loc {
+  color: #006000;
 }
