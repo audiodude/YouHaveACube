@@ -1,7 +1,9 @@
 var cube = {
   happy: 0,
+  leaves: 0,
   go: {}
 };
+
 
 function happinessFor(view) {
   view.happiness = '';
@@ -32,14 +34,23 @@ function nameFor(view) {
   }
 }
 
+function leavesFor(view) {
+  view.leaves = '';
+  // TODO: Make it so that leaves accumulate and the cube gets more leaf covered.
+  if (cube.leaves > 0) {
+    view.leaves = 'leaf-covered';
+  }
+}
+
 function addPrompt(value) {
   view = {};
   happinessFor(view);
   leashFor(view);
   nameFor(view);
+  leavesFor(view);
 
   value.prompt = Mustache.render(
-    'You have a {{happiness}}{{#happiness}} {{/happiness}}cube{{#name}} {{/name}}{{&name}}{{#leash}} {{/leash}}{{leash}}.', view);
+    'You have a {{happiness}}{{#happiness}} {{/happiness}}{{leaves}}{{#leaves}} {{/leaves}}cube{{#name}} {{/name}}{{&name}}{{#leash}} {{/leash}}{{leash}}.', view);
 }
 
 cube.pet = function() {
@@ -53,6 +64,7 @@ cube.pet = function() {
   addPrompt(value);
   return value;
 };
+cube.pet.action = '<span class="word">pet</span> the cube';
 
 cube.leash = function() {
   var value = {};
@@ -97,6 +109,7 @@ cube.write = function(callback) {
     }
   });
 };
+cube.write.action = '<span class="word">write</span> on the cube';
 
 cube.walk = function() {
   value = {};
@@ -117,6 +130,16 @@ cube.walk = function() {
   addPrompt(value);
   return value;
 }
+
+cube.car = function() {
+  value = {};
+  if (true) {  // TODO: make it possible to enter the car. Find keys?
+    value.result = 'The car is locked.';
+  }
+  addPrompt(value);
+  return value;
+}
+cube.car.action = '<span class="word" data-word="car">enter</span> the car';
 
 function animateGoDivs(callback) {
   callback = callback || $.noop;
@@ -177,19 +200,24 @@ function clearDirections() {
   $('#directions').html('');
 }
 
-function doWord(word) {
-  function callback(value) {
-    $('#result').text(value.result);
-    $('#prompt').text(value.prompt);
-  }
+function setResultAndPrompt(value) {
+  $('#result').text(value.result);
+  $('#prompt').text(value.prompt);
+}
 
-  var value = cube[word](callback);
+function doWord(word) {
+  var value = cube[word](setResultAndPrompt);
   if (value) {
-    callback(value);
+    setResultAndPrompt(value);
   }
 }
 
 function moveTo(location) {
+  if (cube.go[location].pre) {
+    $('#result').html('');
+    window.setTimeout(cube.go[location].pre, 200);
+  }
+
   window.setTimeout(function() {
     animateGoDivs(function() {
       $('#result').html('');
@@ -204,25 +232,47 @@ function moveTo(location) {
   }, cube.go[location].delay);
 }
 
-cube.go.house = function(callback) {
-  appendAction('<span class="word">pet</span> the cube');
-  appendAction('<span class="word">write</span> on the cube');
+cube.go.house = function() {
+  appendAction(cube.pet.action);
+  appendAction(cube.write.action);
   appendAction('go for a <span class="word">walk</span>');
-}
+};
 cube.go.house.desc = '';
 cube.go.house.delay = 0;
 cube.go.house.pause = 400;
 
 
-cube.go.outside = function(callback) { 
-  appendAction('<span class="word">pet</span> the cube');
-  appendAction('<span class="word">write</span> on the cube');
+cube.go.outside = function() { 
+  appendAction(cube.pet.action);
+  appendAction(cube.write.action);
+  appendAction(cube.car.action);
   appendDirection('go back <span class="loc">inside</span>', 'house');
   appendDirection('go to the <span class="loc">sidewalk</span>');
-}
+};
 cube.go.outside.desc = 'Outside it is an overcast fall day. There are a few straggling leaves in your yard, leftovers from raking. Your brother Lyle\'s <span class="object">car</span> is parked outside the yard\'s white picket fence. There is an expanse of inviting sidewalk leading from the gate in the fence.';
-cube.go.outside.delay = 1200;
+cube.go.outside.delay = 1600;
 cube.go.outside.pause = 800;
+
+
+cube.go.sidewalk = function() {
+  appendAction(cube.pet.action);
+  appendAction(cube.write.action);
+  appendDirection('re-enter the <span class="loc">yard</span>', 'outside');
+};
+cube.go.sidewalk.pre = function() {
+  cube.leaves += 5;
+  value = {}
+  value.result = Mustache.render(
+    '{{name}}{{^name}}The cube{{/name}} tumbles along after you, leaves ' +
+      'sticking to it.',
+    { 'name': cube.name }
+  );
+  addPrompt(value);
+  setResultAndPrompt(value);
+};
+cube.go.sidewalk.desc = 'From here on the sidewalk you can see most of your street. A passing poet might describe it as an idyllic street. For you, it\'s just where you live. There is a <span class="object">mailbox</span> just outside the gate to your yard.';
+cube.go.sidewalk.delay = 2600;
+cube.go.sidewalk.pause = 400;
 
 
 function attachAction(i, action) {
@@ -230,9 +280,15 @@ function attachAction(i, action) {
     var word = null;
     var tar = $(evt.target);
     if (tar.hasClass('word')) {
-      word = tar.text();
+      word = tar.data('word');
+      if (!word) {
+        word = tar.text();
+      }
     } else {
-      word = tar.children('.word').text();
+      word = tar.children('.word').data('word');
+      if (!word) {
+        word = tar.children('.word').text();
+      }
     }
     if (!word) {
       console.error('Could not get word: ', tar);

@@ -50,7 +50,8 @@
 }
 
 .word,
-.loc {
+.loc ,
+.object {
   text-transform: uppercase;
   font-weight: bold;
 }
@@ -61,4 +62,8 @@
 
 .loc {
   color: #006000;
+}
+
+.object {
+  color: #e59400;
 }
