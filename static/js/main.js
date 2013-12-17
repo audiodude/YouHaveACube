@@ -3,12 +3,6 @@ var cube = {
   go: {}
 };
 
-cube.DESCS = {
-  'house': '',
-  'outside': 'Outside it is an overcast fall day. There are a few straggling leaves in your yard, leftovers from raking. Your brother Lyle\'s <span class="object">car</span> is parked outside the yard\'s white picket fence. There is an expanse of inviting sidewalk leading from the gate in the fence.'
-}
-
-
 function happinessFor(view) {
   view.happiness = '';
   if (cube.happy >= 100) {
@@ -197,38 +191,39 @@ function doWord(word) {
 
 function moveTo(location) {
   window.setTimeout(function() {
-    animateGoDivs(cube.go[location].bind(undefined, animateBackDivs))
-  }, 1600);
+    animateGoDivs(function() {
+      $('#result').html('');
+      $('#description').html(cube.go[location].desc);
+      clearActions();
+      clearDirections();
+
+      cube.go[location]();
+
+      window.setTimeout(animateBackDivs, cube.go[location].pause);
+    });
+  }, cube.go[location].delay);
 }
 
 cube.go.house = function(callback) {
-  $('#result').html('');
-  $('#description').html(cube.DESCS['house']);
-
-  clearActions();
   appendAction('<span class="word">pet</span> the cube');
   appendAction('<span class="word">write</span> on the cube');
   appendAction('go for a <span class="word">walk</span>');
- 
-  clearDirections();
-
-  window.setTimeout(callback, 800);
 }
+cube.go.house.desc = '';
+cube.go.house.delay = 0;
+cube.go.house.pause = 400;
 
-cube.go.outside = function(callback) {
-  $('#result').html('');
-  $('#description').html(cube.DESCS['outside']);
- 
-  clearActions();
+
+cube.go.outside = function(callback) { 
   appendAction('<span class="word">pet</span> the cube');
   appendAction('<span class="word">write</span> on the cube');
-
-  clearDirections();
   appendDirection('go back <span class="loc">inside</span>', 'house');
   appendDirection('go to the <span class="loc">sidewalk</span>');
-
-  window.setTimeout(callback, 800);
 }
+cube.go.outside.desc = 'Outside it is an overcast fall day. There are a few straggling leaves in your yard, leftovers from raking. Your brother Lyle\'s <span class="object">car</span> is parked outside the yard\'s white picket fence. There is an expanse of inviting sidewalk leading from the gate in the fence.';
+cube.go.outside.delay = 1200;
+cube.go.outside.pause = 800;
+
 
 function attachAction(i, action) {
   $(action).click(function(evt) {
