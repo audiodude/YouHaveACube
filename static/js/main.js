@@ -130,7 +130,7 @@ cube.walk = function() {
   }
   addPrompt(value);
   return value;
-}
+};
 
 cube.car = function() {
   value = {};
@@ -139,8 +139,18 @@ cube.car = function() {
   }
   addPrompt(value);
   return value;
-}
+};
 cube.car.action = '<span class="word" data-word="car">enter</span> the car';
+
+cube.mailbox = function() {
+  value = {};
+  if (true) { // TODO: put something in the mailbox.
+    value.result = 'There\'s nothing in the mailbox.';
+  }
+  addPrompt(value);
+  return value;
+};
+cube.mailbox.action = 'check the <span class="word">mailbox</span>';
 
 function animateGoDivs(callback) {
   callback = callback || $.noop;
@@ -267,6 +277,7 @@ cube.go.outside.pause = 800;
 cube.go.sidewalk = function() {
   appendAction(cube.pet.action);
   appendAction(cube.write.action);
+  appendAction(cube.mailbox.action);
   appendDirection('re-enter the <span class="loc">yard</span>', 'outside');
 };
 cube.go.sidewalk.pre = function() {
