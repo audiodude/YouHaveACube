@@ -1,4 +1,5 @@
 var cube = {
+  location: 'house',
   happy: 0,
   leaves: 0,
   go: {}
@@ -218,6 +219,11 @@ function moveTo(location) {
     window.setTimeout(cube.go[location].pre, 200);
   }
 
+  // The delay is calculated differently based on wherey you're coming from.
+  var delay = (cube.go[location].delay[cube.location] ||
+               cube.go[location].delay['default'] || 
+               0);
+
   window.setTimeout(function() {
     animateGoDivs(function() {
       $('#result').html('');
@@ -227,9 +233,11 @@ function moveTo(location) {
 
       cube.go[location]();
 
-      window.setTimeout(animateBackDivs, cube.go[location].pause);
+      window.setTimeout(animateBackDivs(function() {
+        cube.location = location;
+      }), cube.go[location].pause);
     });
-  }, cube.go[location].delay);
+  }, delay);
 }
 
 cube.go.house = function() {
@@ -238,7 +246,7 @@ cube.go.house = function() {
   appendAction('go for a <span class="word">walk</span>');
 };
 cube.go.house.desc = '';
-cube.go.house.delay = 0;
+cube.go.house.delay = {};
 cube.go.house.pause = 400;
 
 
@@ -250,7 +258,9 @@ cube.go.outside = function() {
   appendDirection('go to the <span class="loc">sidewalk</span>');
 };
 cube.go.outside.desc = 'Outside it is an overcast fall day. There are a few straggling leaves in your yard, leftovers from raking. Your brother Lyle\'s <span class="object">car</span> is parked outside the yard\'s white picket fence. There is an expanse of inviting sidewalk leading from the gate in the fence.';
-cube.go.outside.delay = 1600;
+cube.go.outside.delay = {
+  'house': 1600,
+}
 cube.go.outside.pause = 800;
 
 
@@ -271,7 +281,9 @@ cube.go.sidewalk.pre = function() {
   setResultAndPrompt(value);
 };
 cube.go.sidewalk.desc = 'From here on the sidewalk you can see most of your street. A passing poet might describe it as an idyllic street. For you, it\'s just where you live. There is a <span class="object">mailbox</span> just outside the gate to your yard.';
-cube.go.sidewalk.delay = 2600;
+cube.go.sidewalk.delay = {
+  'outside': 2600
+}
 cube.go.sidewalk.pause = 400;
 
 
