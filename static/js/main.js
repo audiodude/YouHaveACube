@@ -267,7 +267,7 @@ cube.go.outside = function() {
   appendDirection('go back <span class="loc">inside</span>', 'house');
   appendDirection('go to the <span class="loc">sidewalk</span>');
 };
-cube.go.outside.desc = 'Outside it is an overcast fall day. There are a few straggling leaves in your yard, leftovers from raking. Your brother Lyle\'s <span class="object">car</span> is parked outside the yard\'s white picket fence. There is an expanse of inviting sidewalk leading from the gate in the fence.';
+cube.go.outside.desc = 'Outside it is an overcast fall day. There are a few straggling leaves in your yard, leftovers from raking. Your brother Lyle\'s <span class="object">car</span> is parked in the driveway. There is an expanse of inviting sidewalk leading from the gate in the fence.';
 cube.go.outside.delay = {
   'house': 1600,
 }
