@@ -2,7 +2,8 @@ var cube = {
   location: 'house',
   happy: 0,
   leaves: 0,
-  go: {}
+  go: {},
+  inventory: {}
 };
 
 
@@ -43,6 +44,13 @@ function leavesFor(view) {
   }
 }
 
+function inventoryFor(view) {
+  var items = [];
+  if (typeof inventory.letter != 'undefined') {
+    items.push('a 3D Creatures Association licensing letter');
+  }
+}
+
 function addPrompt(value) {
   view = {};
   happinessFor(view);
@@ -50,6 +58,8 @@ function addPrompt(value) {
   nameFor(view);
   leavesFor(view);
 
+  inventoryFor(view);
+  
   value.prompt = Mustache.render(
     'You have a {{happiness}}{{#happiness}} {{/happiness}}{{leaves}}{{#leaves}} {{/leaves}}cube{{#name}} {{/name}}{{&name}}{{#leash}} {{/leash}}{{leash}}.', view);
 }
@@ -59,7 +69,7 @@ cube.pet = function() {
 
   value = {};
   value.result = Mustache.render(
-    'You pet {{name}}{{^name}}the cube{{/name}}. It seems happy.',
+    'You pet {{name}}{{^name}}the cube{{/name}}. It seems to like it.',
     { 'name': cube.name }
   );
   addPrompt(value);
@@ -144,13 +154,24 @@ cube.car.action = '<span class="word" data-word="car">enter</span> the car';
 
 cube.mailbox = function() {
   value = {};
-  if (true) { // TODO: put something in the mailbox.
-    value.result = 'There\'s nothing in the mailbox.';
+  value.result = '<p id="mailbox-0" style="display: none;">You slowly open the mailbox, holding your breath...</p>';
+  value.result += '<p id="mailbox-1" style="display: none;">Could it be?</p>';
+  value.result += '<p id="mailbox-2" style="display: none;">Is it there?</p>';
+  value.result += '<div id="mailbox-3" style="display: none;"><p></p><p>...</p><p></p></div>';
+  value.result += '<p id="mailbox-4" style="display: none;">IT IS! It arrived! Your 3D Creatures Association official competition and battle licensing letter! It\'s got the 3D Creatures Association logo right on the front!</p>';
+  cube.inventory.letter = {};
+
+  value.after = function() {
+    window.setTimeout($.proxy($('#mailbox-0').fadeIn, $('#mailbox-0')), 200);
+    window.setTimeout($.proxy($('#mailbox-1').fadeIn, $('#mailbox-1')), 1200);
+    window.setTimeout($.proxy($('#mailbox-2').fadeIn, $('#mailbox-2')), 2000);
+    window.setTimeout($.proxy($('#mailbox-3').fadeIn, $('#mailbox-3')), 2800);
+    window.setTimeout($.proxy($('#mailbox-4').fadeIn, $('#mailbox-4')), 4000);
   }
   addPrompt(value);
   return value;
-};
-cube.mailbox.action = 'check the <span class="word">mailbox</span>';
+}
+cube.mailbox.action = '<span class="word" data-word="mailbox">check</span> the mail';
 
 function animateGoDivs(callback) {
   callback = callback || $.noop;
@@ -212,11 +233,16 @@ function clearDirections() {
 }
 
 function setResultAndPrompt(value) {
-  $('#result').text(value.result);
+  $('#result').html(value.result);
   $('#prompt').text(value.prompt);
+  if (value.after) {
+    value.after();
+  }
 }
 
 function doWord(word) {
+  // Either the action function uses the setResultAndPrompt method as a callback
+  // or it returns a value immediately which we pass to setResultAndPrompt.
   var value = cube[word](setResultAndPrompt);
   if (value) {
     setResultAndPrompt(value);
@@ -229,7 +255,7 @@ function moveTo(location) {
     window.setTimeout(cube.go[location].pre, 200);
   }
 
-  // The delay is calculated differently based on wherey you're coming from.
+  // The delay is calculated differently based on where you're coming from.
   var delay = (cube.go[location].delay[cube.location] ||
                cube.go[location].delay['default'] || 
                0);
