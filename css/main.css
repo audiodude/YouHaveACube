@@ -4,7 +4,8 @@
   margin: 10px;
 }
 
-#prompt {
+#prompt,
+.item .name {
   font-family: monospace;
   font-size: 20px;
   position: relative;
@@ -23,13 +24,18 @@
   position: relative;
 }
 
-#actions {
+#actions,
+.actions {
   padding: 10px;
   position: relative;
 }
 
 #directions {
   padding: 10px;
+  position: relative;
+}
+
+#inventory {
   position: relative;
 }
 

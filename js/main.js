@@ -44,21 +44,12 @@ function leavesFor(view) {
   }
 }
 
-function inventoryFor(view) {
-  var items = [];
-  if (typeof inventory.letter != 'undefined') {
-    items.push('a 3D Creatures Association licensing letter');
-  }
-}
-
-function addPrompt(value) {
+function buildPrompt(value) {
   view = {};
   happinessFor(view);
   leashFor(view);
   nameFor(view);
   leavesFor(view);
-
-  inventoryFor(view);
   
   value.prompt = Mustache.render(
     'You have a {{happiness}}{{#happiness}} {{/happiness}}{{leaves}}{{#leaves}} {{/leaves}}cube{{#name}} {{/name}}{{&name}}{{#leash}} {{/leash}}{{leash}}.', view);
@@ -72,7 +63,7 @@ cube.pet = function() {
     'You pet {{name}}{{^name}}the cube{{/name}}. It seems to like it.',
     { 'name': cube.name }
   );
-  addPrompt(value);
+  buildPrompt(value);
   return value;
 };
 cube.pet.action = '<span class="word">pet</span> the cube';
@@ -91,7 +82,7 @@ cube.leash = function() {
       'about it.';
     appendAction('go for a <span class="word">walk</span>');
   }
-  addPrompt(value);
+  buildPrompt(value);
   return value;
 };
 
@@ -108,7 +99,7 @@ cube.write = function(callback) {
       result: 'You named your cube "' + cube.name + '". What a ' + name_adj + 
         ' name!'
     }
-    addPrompt(value)
+    buildPrompt(value)
     callback(value)
   }
 
@@ -138,7 +129,7 @@ cube.walk = function() {
     );
     moveTo('outside');
   }
-  addPrompt(value);
+  buildPrompt(value);
   return value;
 };
 
@@ -147,7 +138,7 @@ cube.car = function() {
   if (true) {  // TODO: make it possible to enter the car. Find keys?
     value.result = 'The car is locked.';
   }
-  addPrompt(value);
+  buildPrompt(value);
   return value;
 };
 cube.car.action = '<span class="word" data-word="car">enter</span> the car';
@@ -159,7 +150,13 @@ cube.mailbox = function() {
   value.result += '<p id="mailbox-2" style="display: none;">Is it there?</p>';
   value.result += '<div id="mailbox-3" style="display: none;"><p></p><p>...</p><p></p></div>';
   value.result += '<p id="mailbox-4" style="display: none;">IT IS! It arrived! Your 3D Creatures Association official competition and battle licensing letter! It\'s got the 3D Creatures Association logo right on the front!</p>';
-  cube.inventory.letter = {};
+  cube.inventory.letter = {
+    name: 'a 3D Creatures Association licensing letter',
+    quantity: 1,
+    actions: ['<span class="word" data-word="open_letter">open</span> ' +
+              'the letter'],
+    hidden: true
+  };
 
   value.after = function() {
     window.setTimeout($.proxy($('#mailbox-0').fadeIn, $('#mailbox-0')), 200);
@@ -167,8 +164,12 @@ cube.mailbox = function() {
     window.setTimeout($.proxy($('#mailbox-2').fadeIn, $('#mailbox-2')), 2000);
     window.setTimeout($.proxy($('#mailbox-3').fadeIn, $('#mailbox-3')), 2800);
     window.setTimeout($.proxy($('#mailbox-4').fadeIn, $('#mailbox-4')), 4000);
+    window.setTimeout(function() {
+      $('.item[data-key="letter"]').fadeIn();
+      cube.inventory.letter.hidden = false;
+    }, 4000);
   }
-  addPrompt(value);
+  buildPrompt(value);
   return value;
 }
 cube.mailbox.action = '<span class="word" data-word="mailbox">check</span> the mail';
@@ -180,7 +181,9 @@ function animateGoDivs(callback) {
       $('#prompt').animate({left: '-100%'}, 200, function() {
         $('#actions').animate({left: '100%'}, 200, function() {
           $('#directions').animate({left: '-100%'}, 200, function() {
-            callback();
+            $('#inventory').animate({left: '100%'}, 200, function() {
+              callback();
+            });
           });
         });
       });
@@ -195,7 +198,9 @@ function animateBackDivs(callback) {
       $('#prompt').animate({left: '0'}, 200, function() {
         $('#actions').animate({left: '0'}, 200, function() {
           $('#directions').animate({left: '0'}, 200, function() {
-            callback();
+            $('#inventory').animate({left: '0'}, 200, function() {
+              callback();
+            });
           });
         });
       });
@@ -232,9 +237,29 @@ function clearDirections() {
   $('#directions').html('');
 }
 
+function doInventory() {
+  $.each(cube.inventory, function(key, item) {
+    var div = $(Mustache.render(
+      '<div data-key="{{key}}" class="item"{{#hidden}} style="display:none"' +
+        '{{/hidden}}><div class="name">You have {{name}}.</div>' +
+        '<div class="actions"></div></div>', {
+        key: key,
+        name: item.name,
+        hidden: item.hidden
+    }));
+    $('#inventory').append(div);
+    $.each(item.actions, function(idx, action) {
+      var span = $('<span class="action"></span>');
+      span.append(action);
+      $(div).children('.actions').append(span);
+    });
+  });
+}
+
 function setResultAndPrompt(value) {
   $('#result').html(value.result);
   $('#prompt').text(value.prompt);
+  doInventory();
   if (value.after) {
     value.after();
   }
@@ -314,7 +339,7 @@ cube.go.sidewalk.pre = function() {
       'sticking to it.',
     { 'name': cube.name }
   );
-  addPrompt(value);
+  buildPrompt(value);
   setResultAndPrompt(value);
 };
 cube.go.sidewalk.desc = 'From here on the sidewalk you can see most of your street. A passing poet might describe it as an idyllic street. For you, it\'s just where you live. There is a <span class="object">mailbox</span> just outside the gate to your yard.';
