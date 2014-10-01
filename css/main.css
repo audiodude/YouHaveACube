@@ -1,13 +1,19 @@
+p,
+div {
+  margin: 8px 0;
+}
+
 #page {
   overflow: hidden;
   width: 750px;
-  margin: 10px;
+  margin: 16px;
 }
 
 #prompt,
 .item .name {
   font-family: monospace;
   font-size: 20px;
+  margin-top: 20px;
   position: relative;
 }
 
