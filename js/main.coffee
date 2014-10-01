@@ -1,3 +1,20 @@
+###
+This file is the source code for the game. It is compiled to JavaScript using
+the command:
+
+$ coffee -c js/main.coffee
+
+You can optionally add a -w flag to that command so that the .coffee file is
+'watched' and automatically recompiled when it changes. This is quite useful
+in development.
+
+Although the generated main.js file is checked into source control, it should
+not be edited, because all edits will be overwritten by the coffeescript
+compilation step. In fact, the file is only checked into source control because
+the project is deployed to Github Pages via Jekyll, so the file needs to be
+in the tree.
+###
+
 cube =
   location: "house"
   happy: 0
@@ -102,6 +119,13 @@ cube.mailbox = ->
   buildPrompt(value)
 cube.mailbox.action = '<span class="word" data-word="mailbox">check</span>
                        the mail'
+                       
+cube.open_letter = ->
+  value = {}
+  value.result = """
+  This is the contents of the letter. You're reading it! Congratulations!
+  """
+  buildPrompt(value)
 
 cube.go.house = ->
   appendAction(cube.pet.action)
@@ -183,10 +207,10 @@ buildPrompt = (value) ->
   nameFor(view)
   leavesFor(view)
   value.prompt = Mustache.render('
-    You have a {{happiness}}{{#happiness}} {{/happiness}}
-    {{leaves}}{{#leaves}} {{/leaves}}
-    cube{{#name}} {{/name}}{{&name}}
-    {{#leash}} {{/leash}}{{leash}}.
+    You have a {{happiness}}{{#happiness}} {{/happiness}}\
+    {{leaves}}{{#leaves}} {{/leaves}}\
+    cube{{#name}} {{/name}}{{&name}}\
+    {{#leash}} {{/leash}}{{leash}}.\
   ', view)
   value
 
@@ -234,18 +258,18 @@ animateBackDivs = (callback) ->
             , 200, ->
               callback()
 
-appendAction = (action) ->
+appendAction = (action, container="actions") ->
   action = $("<span class=\"action\" style=\"display: none\">#{action}</span>")
   attachAction(null, action)
-  $("#actions").append(action)
+  $("#" + container).append(action)
   action.fadeIn()
 
-removeAction = (word) ->
-  $("#actions .action:contains(\"#{word}\")").fadeOut(complete: ->
+removeAction = (word, container="actions") ->
+  $("#" + container + " .action:contains(\"#{word}\")").fadeOut(complete: ->
       @remove())
 
-clearActions = ->
-  $('#actions').html('')
+clearActions = (container="actions") ->
+  $('#' + container).html('')
 
 appendDirection = (direction, loc_name) ->
   direction = $("<span class=\"direction\" style=\"display: none\">#{direction}
@@ -259,12 +283,13 @@ clearDirections = ->
   return
 
 doInventory = ->
+  $("#inventory").html('');
   $.each(cube.inventory, (key, item) ->
     div = $(Mustache.render('
       <div data-key="{{key}}" class="item"{{#hidden}} style="display:none"
       {{/hidden}}>
         <div class="name">You have {{name}}.</div>
-        <div class="actions"></div>
+        <div id="{{key}}" class="actions"></div>
       </div>
       ',
       key: key
@@ -274,7 +299,7 @@ doInventory = ->
     $("#inventory").append(div)
     $.each(item.actions, (idx, action) ->
       span = $("<span class=\"action\">#{action}</span>")
-      $(div).children(".actions").append(span)
+      appendAction(action, key)
     )
   )
 
