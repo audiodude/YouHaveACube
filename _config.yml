@@ -1,4 +1,4 @@
 safe: true
 lsi: false
-pygments: true
+highlighter: pygments
 exclude: ['venv', 'Gemfile', 'Gemfile.lock', 'node_modules', 'main.coffee']
